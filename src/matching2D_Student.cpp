@@ -280,3 +280,36 @@ void detKeypointsSIFT(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, bool b
     cv::waitKey(0);
     }
 }
+
+//The placeholder for all detection functions
+void detKeypointsModern(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, std::string detectorType, bool bVis)
+{
+    if (detectorType.compare("SHITOMASI") == 0)
+    {
+        detKeypointsShiTomasi(keypoints, img, bVis);
+    }
+    else if (detectorType.compare("HARRIS") == 0)
+    {
+        detKeypointsHarris(keypoints, img, bVis);
+    }
+    else if (detectorType.compare("FAST") == 0)
+    {
+        detKeypointsFAST(keypoints, img, bVis);
+    }
+    else if (detectorType.compare("BRISK") == 0)
+    {
+        detKeypointsBRISK(keypoints, img, bVis);
+    }
+    else if (detectorType.compare("ORB") == 0)
+    {
+        detKeypointsORB(keypoints, img, bVis);
+    }
+    else if (detectorType.compare("AKAZE") == 0)
+    {
+        detKeypointsAKAZE(keypoints, img, bVis);
+    }
+    else if (detectorType.compare("SIFT") == 0)
+    {
+        detKeypointsSIFT(keypoints, img, bVis);
+    }
+}
