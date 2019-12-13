@@ -77,13 +77,15 @@ int main(int argc, const char *argv[])
 
         // extract 2D keypoints from current image
         vector<cv::KeyPoint> keypoints; // create empty feature list for current image
-        string detectorType = "BRISK";
+        string detectorType = "SIFT";
 
         //// STUDENT ASSIGNMENT
         //// TASK MP.2 -> add the following keypoint detectors in file matching2D.cpp and enable string-based selection based on detectorType
         //// -> HARRIS, FAST, BRISK, ORB, AKAZE, SIFT
 
-        detKeypointsModern(keypoints, imgGray, detectorType, true);
+        detKeypointsModern(keypoints, imgGray, detectorType, false);
+
+        //cout << "Original keypoints size = " << keypoints.size() << endl;
 
         //// EOF STUDENT ASSIGNMENT
 
@@ -91,12 +93,17 @@ int main(int argc, const char *argv[])
         //// TASK MP.3 -> only keep keypoints on the preceding vehicle
 
         // only keep keypoints on the preceding vehicle
-        bool bFocusOnVehicle = true;
+        bool bFocusOnVehicle = false;
         cv::Rect vehicleRect(535, 180, 180, 150);
         if (bFocusOnVehicle)
         {
-            // ...
+            for (auto it = keypoints.begin(); it != keypoints.end(); ++it)
+            {
+                if ((*it).pt.x < vehicleRect.x || (*it).pt.x > vehicleRect.x+vehicleRect.width || (*it).pt.y < vehicleRect.y-vehicleRect.height  || (*it).pt.y > vehicleRect.y)
+                    keypoints.erase(it);
+            }
         }
+        //cout << "Cropped keypoints size = " << keypoints.size() << endl;
 
         //// EOF STUDENT ASSIGNMENT
 

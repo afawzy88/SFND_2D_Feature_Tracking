@@ -259,6 +259,28 @@ void detKeypointsAKAZE(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, bool 
     }
 }
 
+// Detect keypoints in image using the FREAK detector
+void detKeypointsFREAK(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, bool bVis)
+{
+    cv::Ptr<cv::FeatureDetector> detector = cv::xfeatures2d::FREAK::create();
+    
+    double t = (double)cv::getTickCount();
+    detector->detect(img, keypoints);
+    t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+    cout << "FREAK detector with n= " << keypoints.size() << " keypoints in " << 1000 * t / 1.0 << " ms" << endl;
+
+    if (bVis)
+    {
+    // visualize keypoints
+    string windowName = "FREAK Detection Results";
+    cv::namedWindow(windowName, 5);
+    cv::Mat visImage = img.clone();
+    cv::drawKeypoints(img, keypoints, visImage, cv::Scalar::all(-1), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
+    imshow(windowName, visImage);
+    cv::waitKey(0);
+    }
+}
+
 // Detect keypoints in image using the SIFT detector
 void detKeypointsSIFT(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, bool bVis)
 {
@@ -273,7 +295,7 @@ void detKeypointsSIFT(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, bool b
     {
     // visualize keypoints
     string windowName = "SIFT Detection Results";
-    cv::namedWindow(windowName, 4);
+    cv::namedWindow(windowName, 6);
     cv::Mat visImage = img.clone();
     cv::drawKeypoints(img, keypoints, visImage, cv::Scalar::all(-1), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
     imshow(windowName, visImage);
@@ -307,6 +329,10 @@ void detKeypointsModern(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, std:
     else if (detectorType.compare("AKAZE") == 0)
     {
         detKeypointsAKAZE(keypoints, img, bVis);
+    }
+    else if (detectorType.compare("FREAK") == 0)
+    {
+        detKeypointsFREAK(keypoints, img, bVis);
     }
     else if (detectorType.compare("SIFT") == 0)
     {
