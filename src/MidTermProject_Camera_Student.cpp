@@ -55,7 +55,7 @@ int main(int argc, const char *argv[])
         cv::Mat img, imgGray;
         img = cv::imread(imgFullFilename);
         cv::cvtColor(img, imgGray, cv::COLOR_BGR2GRAY);
-
+//==============================================================================================================
         //// STUDENT ASSIGNMENT
         //// TASK MP.1 -> replace the following code with ring buffer of size dataBufferSize
 
@@ -72,41 +72,42 @@ int main(int argc, const char *argv[])
 
         //// EOF STUDENT ASSIGNMENT
         cout << "#1 : LOAD IMAGE INTO BUFFER done" << endl;
-
+//==============================================================================================================
         /* DETECT IMAGE KEYPOINTS */
 
         // extract 2D keypoints from current image
         vector<cv::KeyPoint> keypoints; // create empty feature list for current image
-        string detectorType = "SIFT";
+        string detectorType = "BRISK";
 
         //// STUDENT ASSIGNMENT
         //// TASK MP.2 -> add the following keypoint detectors in file matching2D.cpp and enable string-based selection based on detectorType
-        //// -> HARRIS, FAST, BRISK, ORB, AKAZE, SIFT
+        //// -> SHITOMASI, HARRIS, FAST, BRISK, ORB, AKAZE, SIFT
 
-        detKeypointsModern(keypoints, imgGray, detectorType, false);
-
-        //cout << "Original keypoints size = " << keypoints.size() << endl;
+        detKeypointsModern(keypoints, imgGray, detectorType, true);
 
         //// EOF STUDENT ASSIGNMENT
-
+//==============================================================================================================
         //// STUDENT ASSIGNMENT
         //// TASK MP.3 -> only keep keypoints on the preceding vehicle
 
         // only keep keypoints on the preceding vehicle
-        bool bFocusOnVehicle = false;
+        vector<cv::KeyPoint> keypointsCropped;
+        bool bFocusOnVehicle = true;
         cv::Rect vehicleRect(535, 180, 180, 150);
         if (bFocusOnVehicle)
         {
             for (auto it = keypoints.begin(); it != keypoints.end(); ++it)
             {
-                if ((*it).pt.x < vehicleRect.x || (*it).pt.x > vehicleRect.x+vehicleRect.width || (*it).pt.y < vehicleRect.y-vehicleRect.height  || (*it).pt.y > vehicleRect.y)
-                    keypoints.erase(it);
+                if (vehicleRect.contains((*it).pt))
+                    keypointsCropped.push_back(*it);
             }
+            // Updating the original keypoints vector with the list of interest only
+            keypoints.swap(keypointsCropped);
         }
         //cout << "Cropped keypoints size = " << keypoints.size() << endl;
 
         //// EOF STUDENT ASSIGNMENT
-
+//==============================================================================================================
         // optional : limit number of keypoints (helpful for debugging and learning)
         bool bLimitKpts = false;
         if (bLimitKpts)
@@ -120,11 +121,11 @@ int main(int argc, const char *argv[])
             cv::KeyPointsFilter::retainBest(keypoints, maxKeypoints);
             cout << " NOTE: Keypoints have been limited!" << endl;
         }
-
+//==============================================================================================================
         // push keypoints and descriptor for current frame to end of data buffer
         (dataBuffer.end() - 1)->keypoints = keypoints;
         cout << "#2 : DETECT KEYPOINTS done" << endl;
-
+//==============================================================================================================
         /* EXTRACT KEYPOINT DESCRIPTORS */
 
         //// STUDENT ASSIGNMENT
@@ -132,15 +133,17 @@ int main(int argc, const char *argv[])
         //// -> BRIEF, ORB, FREAK, AKAZE, SIFT
 
         cv::Mat descriptors;
-        string descriptorType = "BRISK"; // BRIEF, ORB, FREAK, AKAZE, SIFT
-        descKeypoints((dataBuffer.end() - 1)->keypoints, (dataBuffer.end() - 1)->cameraImg, descriptors, descriptorType);
-        //// EOF STUDENT ASSIGNMENT
+        string descriptorType = "BRISK"; // BRISK, BRIEF, ORB, FREAK, AKAZE, SIFT
 
+        descKeypoints((dataBuffer.end() - 1)->keypoints, (dataBuffer.end() - 1)->cameraImg, descriptors, descriptorType);
+       
+        //// EOF STUDENT ASSIGNMENT
+//==============================================================================================================
         // push descriptors for current frame to end of data buffer
         (dataBuffer.end() - 1)->descriptors = descriptors;
 
         cout << "#3 : EXTRACT DESCRIPTORS done" << endl;
-
+//==============================================================================================================
         if (dataBuffer.size() > 1) // wait until at least two images have been processed
         {
 
