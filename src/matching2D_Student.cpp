@@ -13,12 +13,18 @@ void matchDescriptors(std::vector<cv::KeyPoint> &kPtsSource, std::vector<cv::Key
 
     if (matcherType.compare("MAT_BF") == 0)
     {
-        int normType = cv::NORM_HAMMING;
+        int normType = descriptorType.compare("DES_BINARY") == 0 ? cv::NORM_HAMMING : cv::NORM_L2;
         matcher = cv::BFMatcher::create(normType, crossCheck);
     }
     else if (matcherType.compare("MAT_FLANN") == 0)
     {
-        // ...
+        if (descSource.type() != CV_32F)
+        {
+            descSource.convertTo(descSource, CV_32F);
+            descRef.convertTo(descRef, CV_32F);
+        }
+
+        matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::FLANNBASED);
     }
 
     // perform matching task
@@ -30,7 +36,19 @@ void matchDescriptors(std::vector<cv::KeyPoint> &kPtsSource, std::vector<cv::Key
     else if (selectorType.compare("SEL_KNN") == 0)
     { // k nearest neighbors (k=2)
 
-        // ...
+        vector<vector<cv::DMatch>> knn_matches;
+
+        matcher->knnMatch(descSource, descRef, knn_matches, 2); // finds the 2 best matches
+
+        double minDescDistRatio = 0.8;
+        for (auto it = knn_matches.begin(); it != knn_matches.end(); ++it)
+        {
+
+            if ((*it)[0].distance < minDescDistRatio * (*it)[1].distance)
+            {
+                matches.push_back((*it)[0]);
+            }
+        }
     }
 }
 
@@ -54,7 +72,7 @@ void descKeypoints(vector<cv::KeyPoint> &keypoints, cv::Mat &img, cv::Mat &descr
     }
     else if (descriptorType.compare("ORB") == 0)
     {
-        extractor = cv::ORB::create(10000);
+        extractor = cv::ORB::create();
     }
     else if (descriptorType.compare("FREAK") == 0)
     {
@@ -211,7 +229,7 @@ void detKeypointsModern(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, std:
             detector = cv::BRISK::create();
 
         else if (detectorType.compare("ORB") == 0)
-            detector = cv::ORB::create(10000);
+            detector = cv::ORB::create();
 
         else if (detectorType.compare("AKAZE") == 0)
             detector = cv::AKAZE::create();

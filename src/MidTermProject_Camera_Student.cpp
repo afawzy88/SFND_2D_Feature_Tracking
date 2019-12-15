@@ -77,13 +77,13 @@ int main(int argc, const char *argv[])
 
         // extract 2D keypoints from current image
         vector<cv::KeyPoint> keypoints; // create empty feature list for current image
-        string detectorType = "BRISK";
+        string detectorType = "SIFT";
 
         //// STUDENT ASSIGNMENT
         //// TASK MP.2 -> add the following keypoint detectors in file matching2D.cpp and enable string-based selection based on detectorType
         //// -> SHITOMASI, HARRIS, FAST, BRISK, ORB, AKAZE, SIFT
 
-        detKeypointsModern(keypoints, imgGray, detectorType, true);
+        detKeypointsModern(keypoints, imgGray, detectorType, false);
 
         //// EOF STUDENT ASSIGNMENT
 //==============================================================================================================
@@ -104,7 +104,7 @@ int main(int argc, const char *argv[])
             // Updating the original keypoints vector with the list of interest only
             keypoints.swap(keypointsCropped);
         }
-        //cout << "Cropped keypoints size = " << keypoints.size() << endl;
+        
 
         //// EOF STUDENT ASSIGNMENT
 //==============================================================================================================
@@ -133,7 +133,7 @@ int main(int argc, const char *argv[])
         //// -> BRIEF, ORB, FREAK, AKAZE, SIFT
 
         cv::Mat descriptors;
-        string descriptorType = "BRISK"; // BRISK, BRIEF, ORB, FREAK, AKAZE, SIFT
+        string descriptorType = "ORB"; // BRISK, BRIEF, ORB, FREAK, AKAZE, SIFT
 
         descKeypoints((dataBuffer.end() - 1)->keypoints, (dataBuffer.end() - 1)->cameraImg, descriptors, descriptorType);
        
@@ -150,9 +150,9 @@ int main(int argc, const char *argv[])
             /* MATCH KEYPOINT DESCRIPTORS */
 
             vector<cv::DMatch> matches;
-            string matcherType = "MAT_BF";        // MAT_BF, MAT_FLANN
-            string descriptorType = "DES_BINARY"; // DES_BINARY, DES_HOG
-            string selectorType = "SEL_NN";       // SEL_NN, SEL_KNN
+            string matcherType = "MAT_BF";             // MAT_BF, MAT_FLANN
+            string descriptorType = "DES_BINARY";      // DES_BINARY, DES_HOG
+            string selectorType = "SEL_KNN";           // SEL_NN, SEL_KNN
 
             //// STUDENT ASSIGNMENT
             //// TASK MP.5 -> add FLANN matching in file matching2D.cpp
@@ -162,15 +162,17 @@ int main(int argc, const char *argv[])
                              (dataBuffer.end() - 2)->descriptors, (dataBuffer.end() - 1)->descriptors,
                              matches, descriptorType, matcherType, selectorType);
 
+            cout << "# of matches = " << matches.size() << endl;
+
             //// EOF STUDENT ASSIGNMENT
 
             // store matches in current data frame
             (dataBuffer.end() - 1)->kptMatches = matches;
-
+    
             cout << "#4 : MATCH KEYPOINT DESCRIPTORS done" << endl;
-
+//==============================================================================================================
             // visualize matches between current and previous image
-            bVis = true;
+            bVis = false;
             if (bVis)
             {
                 cv::Mat matchImg = ((dataBuffer.end() - 1)->cameraImg).clone();
